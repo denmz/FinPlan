@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinPlan – Control your money</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a1f6e;
+    --green-lime: #7ef27e;
+    --green-dark: #3dba4e;
+    --gold: #d4a843;
+    --teal: #2bbfb0;
+    --white: #ffffff;
+    --gray-light: #f0f0f0;
+    --gray: #e0e0e0;
+    --text-dark: #1a1f6e;
+    --text-mid: #444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: #f5f7ff; color: var(--text-dark); }
+
+  /* ─── HERO BANNER (shared) ─── */
+  .hero {
+    position: relative;
+    width: 100%; height: 220px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="%23111"/></svg>');
+    background-size: cover;
+  }
+  .hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.55) blur(1px);
+  }
+  .hero-badge {
+    position: relative; z-index: 2;
+    background: var(--navy);
+    color: white;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.35rem; font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 12px 40px;
+    border-radius: 8px;
+    text-align: center;
+    min-width: 260px;
+  }
+  .hero-circles {
+    position: absolute; z-index: 2;
+    display: flex; gap: 0;
+  }
+  .hero-circle-left { left: 20px; top: 30px; }
+  .hero-circle-right { right: 20px; top: 30px; }
+  .circle-decor {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    position: relative;
+  }
+  .circle-decor.green { border-top-color: var(--green-lime); border-left-color: var(--green-lime); transform: rotate(-20deg); }
+  .circle-decor.teal { border-bottom-color: var(--teal); border-right-color: var(--teal); transform: rotate(-20deg); }
+
+  /* House icon overlay */
+  .house-overlay {
+    position: absolute; z-index: 1;
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    opacity: 0.25;
+    font-size: 5rem;
+    pointer-events: none;
+  }
+
+  /* ─── TAGLINE ─── */
+  .tagline {
+    border-top: 2px solid var(--gold);
+    padding: 10px 20px 0;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.1rem; color: var(--navy);
+  }
+
+  /* ─── SCREEN WRAPPER ─── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ─── CONTENT AREA ─── */
+  .content { padding: 20px; flex: 1; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: block; width: 100%;
+    padding: 18px; margin: 12px 0;
+    border: none; border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem; font-weight: 700;
+    cursor: pointer; text-align: center;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  .btn-navy { background: var(--navy); color: white; font-size: 1.25rem; }
+  .btn-green { background: var(--green-lime); color: var(--navy); }
+  .btn-gold { background: var(--gold); color: white; }
+  .btn-teal { background: var(--teal); color: white; }
+  .btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+
+  /* ─── FORM ─── */
+  .form-group { margin: 14px 0; }
+  .form-group label { display: block; font-weight: 700; margin-bottom: 4px; color: var(--navy); font-size: .85rem; }
+  .form-group input {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid #ccc; border-radius: 6px;
+    font-family: 'Nunito', sans-serif; font-size: 1rem;
+    background: var(--gray-light);
+  }
+  .form-group input:focus { outline: 2px solid var(--navy); }
+
+  /* ─── CARD BOX ─── */
+  .card {
+    background: var(--gray-light);
+    border-radius: 14px; padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  /* ─── NAV BOTTOM ─── */
+  .bottom-nav {
+    display: flex; justify-content: space-around; align-items: center;
+    background: var(--navy);
+    padding: 10px 0; border-top: 3px solid var(--gold);
+    position: sticky; bottom: 0; z-index: 100;
+  }
+  .bottom-nav button {
+    background: none; border: none; color: rgba(255,255,255,.6);
+    font-size: .7rem; font-weight: 700; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    transition: color .15s;
+  }
+  .bottom-nav button.active-nav, .bottom-nav button:hover { color: var(--green-lime); }
+  .bottom-nav button span { font-size: 1.3rem; }
+
+  /* ─── MENU HAMBURGUESA ─── */
+  .hamburger-btn {
+    position: absolute; right: 16px; top: 60px; z-index: 200;
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; gap: 5px; padding: 4px;
+  }
+  .hamburger-btn div { width: 28px; height: 3px; background: white; border-radius: 2px; }
+  .side-menu {
+    position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+    background: var(--navy); z-index: 500;
+    transition: right .3s; padding: 30px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .side-menu.open { right: 0; }
+  .side-menu h3 { color: var(--green-lime); font-size: 1.1rem; margin-bottom: 6px; }
+  .side-menu .s-item {
+    color: white; padding: 12px 10px; background: rgba(255,255,255,.08);
+    border-radius: 8px; cursor: pointer; font-weight: 700;
+    border: none; text-align: left; font-family: 'Nunito', sans-serif; font-size: .95rem;
+    transition: background .15s;
+  }
+  .side-menu .s-item:hover { background: rgba(255,255,255,.18); }
+  .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 400; }
+  .overlay-bg.open { display: block; }
+  .close-menu { color: white; font-size: 1.5rem; background: none; border: none; cursor: pointer; align-self: flex-end; margin-bottom: 10px; }
+
+  /* ─── INCOME SOURCE ITEM ─── */
+  .income-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px; margin: 8px 0;
+    background: white; border-radius: 10px;
+    border-left: 4px solid var(--teal);
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .income-item .label { font-weight: 700; }
+  .income-item .amount { color: var(--green-dark); font-weight: 800; font-size: 1.05rem; }
+  .expense-item { border-left-color: #e05c5c; }
+  .expense-item .amount { color: #e05c5c; }
+
+  /* ─── SAVINGS GOAL CARD ─── */
+  .goal-card {
+    border-radius: 14px; padding: 16px 18px; margin: 10px 0;
+    cursor: pointer; font-weight: 800; font-size: 1.2rem;
+    text-align: center; transition: transform .15s;
+  }
+  .goal-card:hover { transform: scale(1.02); }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap { background: #ddd; border-radius: 20px; height: 12px; overflow: hidden; margin: 8px 0; }
+  .progress-fill { height: 100%; border-radius: 20px; transition: width .5s; }
+
+  /* ─── FAQ ─── */
+  .faq-item { border-bottom: 1px solid #ccc; padding: 12px 0; }
+  .faq-q { font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; }
+  .faq-a { display: none; color: var(--text-mid); margin-top: 6px; font-size: .92rem; }
+  .faq-item.open .faq-a { display: block; }
+
+  /* ─── FIN EDU topic tile ─── */
+  .edu-tile {
+    background: white; border-radius: 12px; padding: 14px 16px;
+    margin: 8px 0; cursor: pointer; border-left: 5px solid var(--teal);
+    transition: box-shadow .15s;
+  }
+  .edu-tile:hover { box-shadow: 0 4px 14px rgba(43,191,176,.3); }
+  .edu-tile h4 { color: var(--teal); font-size: 1rem; margin-bottom: 4px; }
+  .edu-tile p { font-size: .85rem; color: #555; }
+
+  /* ─── MODAL (edu detail / goal detail) ─── */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 600; align-items: center; justify-content: center; }
+  .modal-backdrop.open { display: flex; }
+  .modal-box { background: white; border-radius: 18px; padding: 26px 22px; max-width: 380px; width: 90%; max-height: 80vh; overflow-y: auto; }
+  .modal-box h2 { color: var(--navy); margin-bottom: 12px; }
+  .modal-close { display: block; margin-top: 18px; }
+
+  /* ─── CHART placeholder ─── */
+  .donut-wrap { display: flex; justify-content: center; margin: 16px 0; }
+  canvas { border-radius: 50%; }
+
+  /* ─── TOTALS ─── */
+  .total-row { display: flex; justify-content: space-between; padding: 14px 0; border-top: 2px solid var(--gray); font-size: 1.1rem; font-weight: 800; }
+  .green-val { color: var(--green-dark); }
+  .red-val { color: #e05c5c; }
+
+  /* ─── WELCOME hint ─── */
+  .hint { font-size: .82rem; color: #888; text-align: center; margin-top: 8px; }
+  .error-msg { color: #e05c5c; font-size: .85rem; margin-top: 6px; text-align: center; font-weight: 700; }
+
+  /* Back button */
+  .back-btn {
+    background: none; border: 2px solid rgba(255,255,255,.6);
+    color: white; border-radius: 20px; padding: 4px 14px;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-size: .8rem; font-weight: 700;
+    position: absolute; left: 14px; top: 14px; z-index: 10;
+  }
+  .back-btn:hover { background: rgba(255,255,255,.15); }
+
+  /* GREEN bottom strip */
+  .green-strip { background: var(--green-lime); padding: 10px; text-align: center; }
+  .green-strip img { width: 120px; border-radius: 10px; opacity: .8; }
+
+  /* Tip box */
+  .tip-box { background: #fffbe6; border-left: 4px solid var(--gold); padding: 12px 14px; border-radius: 8px; margin: 12px 0; font-size: .88rem; }
+
+  /* Link style */
+  .link-text { color: var(--navy); text-decoration: underline; cursor: pointer; font-weight: 700; }
+  .small-cta { text-align: center; font-size: .9rem; margin: 8px 0; color: #555; }
+
+  /* Section title */
+  .sec-title { font-family: 'Baloo 2', cursive; font-size: 1.3rem; color: var(--navy); margin: 18px 0 6px; }
+
+  /* Budget row */
+  .budget-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #ddd; font-size: .95rem; }
+  .budget-row strong { color: var(--navy); }
+
+  /* Add form inline */
+  .add-form { background: white; border-radius: 12px; padding: 16px; margin: 10px 0; display: none; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+  .add-form.open { display: block; }
+  .add-form input, .add-form select {
+    width: 100%; padding: 8px 12px; margin: 6px 0;
+    border: 1px solid #ccc; border-radius: 6px;
+    font-family: 'Nunito', sans-serif; font-size: .95rem;
+  }
+  .add-form .btn { margin: 8px 0 0; }
+
+  @media(max-width:420px){ .hero-badge { font-size: 1rem; padding: 10px 20px; } }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     SIDE MENU (global)
+════════════════════════════════════════ -->
+<div class="overlay-bg" id="overlayBg" onclick="closeSideMenu()"></div>
+<div class="side-menu" id="sideMenu">
+  <button class="close-menu" onclick="closeSideMenu()">✕</button>
+  <h3>☰ FinPlan Menu</h3>
+  <button class="s-item" onclick="navTo('profile');closeSideMenu()">🏠 Mi Perfil</button>
+  <button class="s-item" onclick="navTo('income');closeSideMenu()">💰 Ingresos</button>
+  <button class="s-item" onclick="navTo('expenses');closeSideMenu()">💸 Gastos</button>
+  <button class="s-item" onclick="navTo('savings');closeSideMenu()">🎯 Metas de Ahorro</button>
+  <button class="s-item" onclick="navTo('budget');closeSideMenu()">📊 Mi Presupuesto</button>
+  <button class="s-item" onclick="navTo('education');closeSideMenu()">📚 Educación Financiera</button>
+  <hr style="border-color:rgba(255,255,255,.2)">
+  <div style="color:rgba(255,255,255,.5);font-size:.8rem;padding:4px 10px;">
+    💡 Consejo del día:<br><em>"Ahorra el 20% de cada ingreso antes de gastar."</em>
+  </div>
+  <button class="s-item" style="margin-top:auto;background:rgba(255,80,80,.2);" onclick="logout()">🔓 Cerrar sesión</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     MODAL: Edu Detail
+════════════════════════════════════════ -->
+<div class="modal-backdrop" id="eduModal">
+  <div class="modal-box">
+    <h2 id="eduModalTitle"></h2>
+    <p id="eduModalBody" style="color:#555;line-height:1.6;font-size:.93rem;"></p>
+    <button class="btn btn-navy modal-close" onclick="closeModal('eduModal')">Cerrar</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     MODAL: Goal Detail
+════════════════════════════════════════ -->
+<div class="modal-backdrop" id="goalModal">
+  <div class="modal-box">
+    <h2 id="goalModalTitle"></h2>
+    <div id="goalModalBody"></div>
+    <button class="btn btn-navy modal-close" onclick="closeModal('goalModal')">Cerrar</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: LOGIN
+════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="hero">
+    <img class="hero-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="heroBgLogin" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">WELCOME TO FINPLAN</div>
+    <div class="house-overlay">🏠</div>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <h2 style="text-align:center;color:var(--green-dark);font-size:1.5rem;margin:16px 0 4px;">Control your money</h2>
+    <h2 style="text-align:center;color:var(--green-dark);font-size:1.5rem;margin:0 0 20px;">Control your future</h2>
+    <p style="font-size:.75rem;font-weight:700;letter-spacing:1px;color:#888;margin-bottom:8px;">GET INTO YOUR ACCOUNT</p>
+    <div class="form-group">
+      <label>E-mail:</label>
+      <input type="email" id="loginEmail" placeholder="correo@ejemplo.com">
+    </div>
+    <div class="form-group">
+      <label>Password:</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <div class="error-msg" id="loginError"></div>
+    <button class="btn btn-navy" style="margin-top:16px;" onclick="doLogin()">LOG IN</button>
+    <p class="small-cta">¿No tienes cuenta? <span class="link-text" onclick="navTo('register')">Sing In for free</span></p>
+    <p class="small-cta"><span class="link-text" onclick="navTo('register')">Get started</span></p>
+    <div class="hint">Demo: bogledaniela123@gmail.com / lospatitos</div>
+  </div>
+  <div class="green-strip"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="stripLogin" alt="FinPlan"></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: REGISTER
+════════════════════════════════════════ -->
+<div class="screen" id="screen-register">
+  <div class="hero">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">WELCOME TO FINPLAN</div>
+    <div class="house-overlay">🏠</div>
+    <button class="back-btn" onclick="navTo('login')">← Volver</button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <h2 style="text-align:center;color:var(--green-dark);font-size:1.4rem;margin:16px 0 20px;">Control your money<br>Control your future</h2>
+    <p style="font-size:.75rem;font-weight:700;letter-spacing:1px;color:#888;margin-bottom:8px;">CREATE YOUR ACCOUNT</p>
+    <div class="form-group">
+      <label>Nombre:</label>
+      <input type="text" id="regName" placeholder="Tu nombre">
+    </div>
+    <div class="form-group">
+      <label>E-mail:</label>
+      <input type="email" id="regEmail" placeholder="correo@ejemplo.com">
+    </div>
+    <div class="form-group">
+      <label>Password:</label>
+      <input type="password" id="regPass" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="error-msg" id="regError"></div>
+    <button class="btn btn-navy" style="margin-top:16px;" onclick="doRegister()">Create account</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: MY PROFILE
+════════════════════════════════════════ -->
+<div class="screen" id="screen-profile">
+  <div class="hero" style="position:relative;">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">My Profile FINPLAN</div>
+    <div class="house-overlay">🏠</div>
+    <button class="hamburger-btn" onclick="openSideMenu()">
+      <div></div><div></div><div></div>
+    </button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <p style="text-align:center;color:#888;font-size:.85rem;margin-bottom:12px;">Principal feed</p>
+    <button class="btn btn-navy" onclick="navTo('education')">Financial Education</button>
+    <button class="btn btn-green" onclick="navTo('savings')">Savings to Goals</button>
+    <button class="btn btn-gold" onclick="navTo('budget')">My Budget</button>
+    <p class="small-cta" style="margin-top:20px;">
+      <span class="link-text" onclick="showEduInfo()">Get more info about how can your future be changed</span>
+    </p>
+    <p class="small-cta">
+      <span class="link-text" onclick="navTo('faq')">Any question? Let us help you achieve your dreams</span>
+    </p>
+  </div>
+  <div class="bottom-nav" id="profileNav">
+    <button onclick="navTo('profile')" class="active-nav"><span>🏠</span>Home</button>
+    <button onclick="navTo('income')"><span>💰</span>Ingresos</button>
+    <button onclick="navTo('expenses')"><span>💸</span>Gastos</button>
+    <button onclick="navTo('savings')"><span>🎯</span>Metas</button>
+    <button onclick="navTo('budget')"><span>📊</span>Budget</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: INCOME
+════════════════════════════════════════ -->
+<div class="screen" id="screen-income">
+  <div class="hero">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">INCOME</div>
+    <div class="house-overlay">🏠</div>
+    <button class="back-btn" onclick="navTo('profile')">← Volver</button>
+    <button class="hamburger-btn" onclick="openSideMenu()"><div></div><div></div><div></div></button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <div class="card">
+      <h3 style="font-size:1rem;margin-bottom:6px;">💰 Income Overview</h3>
+      <p style="font-size:.85rem;color:#666;margin-bottom:4px;">Total Income This Month:</p>
+      <p style="font-size:2rem;font-weight:900;color:var(--green-dark);" id="totalIncome">$0</p>
+    </div>
+    <button class="btn btn-teal" style="font-size:.95rem;" onclick="toggleAddIncome()">+ Add Income</button>
+    <div class="add-form" id="addIncomeForm">
+      <input type="text" id="newIncomeLabel" placeholder="Fuente (ej. Salario)">
+      <input type="number" id="newIncomeAmount" placeholder="Monto $">
+      <button class="btn btn-navy" onclick="addIncome()">Agregar</button>
+    </div>
+    <p class="sec-title">Sources of Income:</p>
+    <div id="incomeList"></div>
+    <div class="tip-box">💡 <strong>Tip:</strong> "Track all your income sources to manage your finances better."</div>
+  </div>
+  <div class="bottom-nav">
+    <button onclick="navTo('profile')"><span>🏠</span>Home</button>
+    <button onclick="navTo('income')" class="active-nav"><span>💰</span>Ingresos</button>
+    <button onclick="navTo('expenses')"><span>💸</span>Gastos</button>
+    <button onclick="navTo('savings')"><span>🎯</span>Metas</button>
+    <button onclick="navTo('budget')"><span>📊</span>Budget</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: EXPENSES
+════════════════════════════════════════ -->
+<div class="screen" id="screen-expenses">
+  <div class="hero">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">EXPENSES</div>
+    <div class="house-overlay">🏠</div>
+    <button class="back-btn" onclick="navTo('budget')">← Volver</button>
+    <button class="hamburger-btn" onclick="openSideMenu()"><div></div><div></div><div></div></button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <div class="card">
+      <h3 style="font-size:1rem;margin-bottom:6px;">💸 Expenses Overview</h3>
+      <p style="font-size:.85rem;color:#666;margin-bottom:4px;">Total Expenses This Month:</p>
+      <p style="font-size:2rem;font-weight:900;color:#e05c5c;" id="totalExpenses">$0</p>
+    </div>
+    <button class="btn btn-teal" style="font-size:.95rem;" onclick="toggleAddExpense()">+ Add Expense</button>
+    <div class="add-form" id="addExpenseForm">
+      <input type="text" id="newExpenseLabel" placeholder="Gasto (ej. Renta)">
+      <select id="newExpenseCat">
+        <option value="Vivienda">🏠 Vivienda</option>
+        <option value="Alimentación">🍔 Alimentación</option>
+        <option value="Transporte">🚗 Transporte</option>
+        <option value="Entretenimiento">🎉 Entretenimiento</option>
+        <option value="Salud">❤️ Salud</option>
+        <option value="Educación">📚 Educación</option>
+        <option value="Otro">📦 Otro</option>
+      </select>
+      <input type="number" id="newExpenseAmount" placeholder="Monto $">
+      <button class="btn btn-navy" onclick="addExpense()">Agregar</button>
+    </div>
+    <p class="sec-title">Mis Gastos:</p>
+    <div id="expenseList"></div>
+  </div>
+  <div class="bottom-nav">
+    <button onclick="navTo('profile')"><span>🏠</span>Home</button>
+    <button onclick="navTo('income')"><span>💰</span>Ingresos</button>
+    <button onclick="navTo('expenses')" class="active-nav"><span>💸</span>Gastos</button>
+    <button onclick="navTo('savings')"><span>🎯</span>Metas</button>
+    <button onclick="navTo('budget')"><span>📊</span>Budget</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: BUDGET (My money vs expend)
+════════════════════════════════════════ -->
+<div class="screen" id="screen-budget">
+  <div class="hero">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">My money vs expend</div>
+    <div class="house-overlay">🏠</div>
+    <button class="back-btn" onclick="navTo('profile')">← Volver</button>
+    <button class="hamburger-btn" onclick="openSideMenu()"><div></div><div></div><div></div></button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <div class="donut-wrap">
+      <canvas id="budgetChart" width="180" height="180"></canvas>
+    </div>
+    <button class="btn btn-navy" onclick="navTo('income')">Income</button>
+    <button class="btn btn-green" onclick="navTo('expenses')">Expenses</button>
+    <button class="btn btn-gold" onclick="showBudgetDetail()">Created my budget</button>
+    <div id="budgetSummary" style="display:none;">
+      <p class="sec-title">Resumen del mes</p>
+      <div class="budget-row"><span>Total Ingresos</span><strong class="green-val" id="bs-income">$0</strong></div>
+      <div class="budget-row"><span>Total Gastos</span><strong class="red-val" id="bs-expenses">$0</strong></div>
+      <div class="budget-row"><span>Saldo disponible</span><strong id="bs-balance">$0</strong></div>
+      <div class="budget-row"><span>Estimado a gastar</span><strong id="bs-est">—</strong></div>
+      <div class="budget-row"><span>Debe sobrar</span><strong class="green-val" id="bs-surplus">—</strong></div>
+      <div class="tip-box" style="margin-top:12px;">💡 Intenta mantener tus gastos por debajo del 80% de tus ingresos.</div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button onclick="navTo('profile')"><span>🏠</span>Home</button>
+    <button onclick="navTo('income')"><span>💰</span>Ingresos</button>
+    <button onclick="navTo('expenses')"><span>💸</span>Gastos</button>
+    <button onclick="navTo('savings')"><span>🎯</span>Metas</button>
+    <button onclick="navTo('budget')" class="active-nav"><span>📊</span>Budget</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: SAVINGS GOALS
+════════════════════════════════════════ -->
+<div class="screen" id="screen-savings">
+  <div class="hero">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">SAVING GOALS – GET THEM</div>
+    <div class="house-overlay">🏠</div>
+    <button class="back-btn" onclick="navTo('profile')">← Volver</button>
+    <button class="hamburger-btn" onclick="openSideMenu()"><div></div><div></div><div></div></button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <p style="color:#666;font-size:.9rem;margin-bottom:14px;">Make a list of your goals and save for them</p>
+    <div id="goalsList"></div>
+    <button class="btn btn-teal" onclick="toggleAddGoal()">ADD MORE +</button>
+    <div class="add-form" id="addGoalForm">
+      <input type="text" id="newGoalName" placeholder="Nombre de la meta (ej. JAPÓN)">
+      <input type="number" id="newGoalTarget" placeholder="Meta total $">
+      <input type="number" id="newGoalSaved" placeholder="Ya ahorrado $">
+      <input type="number" id="newGoalMonthly" placeholder="Cuánto ahorrar al mes $">
+      <button class="btn btn-navy" onclick="addGoal()">Crear Meta</button>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button onclick="navTo('profile')"><span>🏠</span>Home</button>
+    <button onclick="navTo('income')"><span>💰</span>Ingresos</button>
+    <button onclick="navTo('expenses')"><span>💸</span>Gastos</button>
+    <button onclick="navTo('savings')" class="active-nav"><span>🎯</span>Metas</button>
+    <button onclick="navTo('budget')"><span>📊</span>Budget</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: FINANCIAL EDUCATION
+════════════════════════════════════════ -->
+<div class="screen" id="screen-education">
+  <div class="hero">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">Financial Education</div>
+    <div class="house-overlay">🏠</div>
+    <button class="back-btn" onclick="navTo('profile')">← Volver</button>
+    <button class="hamburger-btn" onclick="openSideMenu()"><div></div><div></div><div></div></button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <p style="color:#555;line-height:1.6;margin-bottom:16px;font-size:.93rem;">
+      La educación financiera provee el conocimiento y habilidades para administrar dinero: crear un presupuesto, rastrear gastos, manejar deudas y establecer metas de ahorro.
+    </p>
+    <div id="eduTopics"></div>
+  </div>
+  <div class="bottom-nav">
+    <button onclick="navTo('profile')"><span>🏠</span>Home</button>
+    <button onclick="navTo('income')"><span>💰</span>Ingresos</button>
+    <button onclick="navTo('expenses')"><span>💸</span>Gastos</button>
+    <button onclick="navTo('savings')"><span>🎯</span>Metas</button>
+    <button onclick="navTo('education')" class="active-nav"><span>📚</span>Edu</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCREEN: FAQ
+════════════════════════════════════════ -->
+<div class="screen" id="screen-faq">
+  <div class="hero">
+    <img class="hero-img" src="" alt="">
+    <div class="hero-circle-left hero-circles"><div class="circle-decor green"></div></div>
+    <div class="hero-circle-right hero-circles"><div class="circle-decor teal"></div></div>
+    <div class="hero-badge">Preguntas Frecuentes</div>
+    <div class="house-overlay">🏠</div>
+    <button class="back-btn" onclick="navTo('profile')">← Volver</button>
+  </div>
+  <div class="tagline">FinPlan ! Easily to use , Easily to learn</div>
+  <div class="content">
+    <p style="color:#555;margin-bottom:16px;font-size:.9rem;">Toca una pregunta para ver la respuesta.</p>
+    <div id="faqList"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     JS
+════════════════════════════════════════ -->
+<script>
+// ── HERO IMAGE ─────────────────────────────────────────
+const HERO_IMG = "/mnt/user-data/uploads/1776752328974_Gemini_Generated_Image_a4ezhra4ezhra4ez__3_.png";
+function setHeroImages() {
+  document.querySelectorAll('.hero-img').forEach(img => {
+    img.src = HERO_IMG;
+    img.onerror = function() {
+      this.style.display='none';
+      this.parentElement.style.background='linear-gradient(135deg,#1a1f6e 0%,#2bbfb0 50%,#7ef27e 100%)';
+    };
+  });
+}
+setHeroImages();
+
+// ══════════════════════════════════════════════════════
+//  BASE DE DATOS  →  localStorage
+//  Clave: "finplan_db"
+//  Estructura: { users: [ { email, password, name, income[], expenses[], goals[] } ] }
+// ══════════════════════════════════════════════════════
+
+const DEMO_USER = {
+  email: "bogledaniela123@gmail.com",
+  password: "lospatitos",
+  name: "Daniela",
+  income: [
+    { id: 1, label: "Salario",       amount: 2000 },
+    { id: 2, label: "Freelance Work",amount: 300  },
+    { id: 3, label: "Other",         amount: 200  }
+  ],
+  expenses: [
+    { id: 1, label: "Renta",          cat: "Vivienda",        amount: 600 },
+    { id: 2, label: "Supermercado",   cat: "Alimentación",    amount: 250 },
+    { id: 3, label: "Gasolina",       cat: "Transporte",      amount: 120 },
+    { id: 4, label: "Netflix/Spotify",cat: "Entretenimiento", amount: 30  }
+  ],
+  goals: [
+    { id: 1, name: "NEW CAR", target: 15000, saved: 3200, monthly: 500 },
+    { id: 2, name: "JAPAN",   target: 3500,  saved: 800,  monthly: 200 },
+    { id: 3, name: "WEDDING", target: 8000,  saved: 1200, monthly: 300 }
+  ]
+};
+
+// Cargar BD desde localStorage; si no existe, inicializarla con el usuario demo
+function loadDB() {
+  try {
+    const raw = localStorage.getItem('finplan_db');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  // Primera vez: crear con usuario demo
+  const initial = { users: [DEMO_USER] };
+  saveDB(initial);
+  return initial;
+}
+
+function saveDB(db) {
+  try { localStorage.setItem('finplan_db', JSON.stringify(db)); } catch(e) {}
+}
+
+// Objeto global de BD (siempre en memoria + sincronizado a localStorage)
+let DB = loadDB();
+
+// Asegura que el usuario demo siempre exista (por si alguien borra el localStorage)
+if (!DB.users.find(u => u.email === DEMO_USER.email)) {
+  DB.users.push(DEMO_USER);
+  saveDB(DB);
+}
+
+// ── Referencia viva al usuario actual ─────────────────
+// currentUser apunta al objeto DENTRO de DB.users,
+// así cualquier push/modificación ya está en el objeto que saveDB() serializará.
+let currentUser = null;
+
+// ── Helpers: guardar cambios del usuario actual ────────
+function persist() {
+  // Reemplaza el registro del usuario en DB.users y guarda
+  const idx = DB.users.findIndex(u => u.email === currentUser.email);
+  if (idx !== -1) DB.users[idx] = currentUser;
+  saveDB(DB);
+}
+
+// ── EDUCATION DATA ──────────────────────────────────────
+const EDU_TOPICS = [
+  {
+    title: "Inversión y Retiro",
+    color: "#2bbfb0",
+    short: "Entiende tasas de interés e inflación para construir riqueza.",
+    long: "Comprender las tasas de interés y la inflación es fundamental. Los vehículos de inversión incluyen acciones, bonos, bienes raíces y fondos de retiro como el IRA o 401(k). Cuanto antes comiences, más tiempo tiene tu dinero para crecer gracias al interés compuesto. El objetivo es que tus inversiones superen a la inflación para mantener y aumentar tu poder adquisitivo en la jubilación."
+  },
+  {
+    title: "Gestión del Riesgo",
+    color: "#1a1f6e",
+    short: "Usa seguros para proteger activos y evita estafas financieras.",
+    long: "El riesgo financiero es inevitable, pero manejable. Un buen seguro (vida, salud, auto, hogar) protege tu patrimonio ante imprevistos. También es vital identificar estafas: esquemas Ponzi, phishing, inversiones milagrosas. Regla de oro: si parece demasiado bueno para ser verdad, probablemente lo es. Diversifica tus inversiones para no depender de un solo activo."
+  },
+  {
+    title: "Seguridad Financiera Mejorada",
+    color: "#d4a843",
+    short: "Reduce vulnerabilidad ante crisis y vive dentro de tus posibilidades.",
+    long: "Tener un fondo de emergencia equivalente a 3-6 meses de gastos es la base de la seguridad financiera. Esto te protege de imprevistos como pérdida de empleo o gastos médicos. Vivir dentro de tus posibilidades significa gastar menos de lo que ganas de forma consistente. Evita las deudas de alto interés como tarjetas de crédito revolving."
+  },
+  {
+    title: "Logro de Metas",
+    color: "#3dba4e",
+    short: "Planifica grandes eventos como comprar casa o retirarte.",
+    long: "Las metas financieras deben ser SMART: Específicas, Medibles, Alcanzables, Relevantes y con Tiempo definido. Para comprar una casa, calcula el enganche y la cuota mensual que puedes pagar. Para el retiro, usa calculadoras de jubilación para saber cuánto necesitas ahorrar mensualmente. Revisa y ajusta tus metas regularmente."
+  },
+  {
+    title: "Programas Educativos",
+    color: "#7ef27e",
+    short: "Escuelas y organizaciones ofrecen talleres de finanzas básicas.",
+    long: "Busca talleres gratuitos en tu comunidad, biblioteca o municipalidad. Plataformas como Coursera, Khan Academy y YouTube tienen cursos excelentes de finanzas personales. Libros recomendados: 'Padre Rico, Padre Pobre' (R. Kiyosaki), 'El Hombre más Rico de Babilonia' (G. Clason), 'I Will Teach You to Be Rich' (R. Sethi). La educación financiera es una inversión en ti mismo."
+  }
+];
+
+const FAQ_DATA = [
+  { q: "¿Cómo creo un presupuesto?", a: "Lista todos tus ingresos y gastos fijos. Luego aplica la regla 50/30/20: 50% necesidades, 30% deseos, 20% ahorro e inversión. En FinPlan puedes hacerlo en 'My Budget'." },
+  { q: "¿Cuánto debo ahorrar al mes?", a: "Lo ideal es ahorrar al menos el 20% de tus ingresos. Si es difícil al inicio, empieza con el 5-10% y aumenta gradualmente. Lo importante es la consistencia." },
+  { q: "¿Cómo pago mis deudas más rápido?", a: "Usa el método 'avalancha': paga primero la deuda con mayor tasa de interés. O el método 'bola de nieve': paga la deuda más pequeña primero para ganar motivación." },
+  { q: "¿Qué es el interés compuesto?", a: "Es ganar interés sobre tu interés. Si ahorras $100 al 10% anual, al año tienes $110. El siguiente año ganas interés sobre $110, no sobre $100. En el largo plazo es muy poderoso." },
+  { q: "¿Cómo empiezo a invertir?", a: "Primero ten un fondo de emergencia. Luego invierte en fondos indexados de bajo costo. En Costa Rica, SUGEVAL regula los fondos de inversión locales. También considera el mercado estadounidense mediante brokers como Schwab o Interactive Brokers." },
+  { q: "¿Para qué sirve FinPlan?", a: "FinPlan te ayuda a registrar ingresos y gastos, crear metas de ahorro con seguimiento, entender tu presupuesto mensual y educarte financieramente, todo desde tu celular." }
+];
+
+// ── NAVIGATION ─────────────────────────────────────────
+const screens = ["login","register","profile","income","expenses","budget","savings","education","faq"];
+
+function navTo(name) {
+  screens.forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    if(el) { el.classList.remove('active'); el.style.display='none'; }
+  });
+  const target = document.getElementById('screen-'+name);
+  if(target) { target.classList.add('active'); target.style.display='flex'; }
+  if(name==='income') renderIncome();
+  if(name==='expenses') renderExpenses();
+  if(name==='savings') renderGoals();
+  if(name==='budget') renderBudget();
+  if(name==='education') renderEdu();
+  if(name==='faq') renderFAQ();
+  window.scrollTo(0,0);
+}
+
+// ── AUTH ───────────────────────────────────────────────
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPass').value;
+  // Recargar DB por si otro tab la modificó
+  DB = loadDB();
+  const found = DB.users.find(u => u.email.toLowerCase() === email && u.password === pass);
+  if (found) {
+    currentUser = found;           // referencia viva dentro de DB.users
+    document.getElementById('loginError').textContent = '';
+    navTo('profile');
+  } else {
+    document.getElementById('loginError').textContent = '❌ Correo o contraseña incorrectos.';
+  }
+}
+
+function doRegister() {
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('regPass').value;
+  if (!name||!email||!pass) { document.getElementById('regError').textContent='Por favor llena todos los campos.'; return; }
+  if (pass.length < 6)      { document.getElementById('regError').textContent='La contraseña debe tener al menos 6 caracteres.'; return; }
+  DB = loadDB();
+  if (DB.users.find(u => u.email.toLowerCase() === email)) {
+    document.getElementById('regError').textContent = 'Ese correo ya existe. Inicia sesión.'; return;
+  }
+  const newUser = { email, password: pass, name, income:[], expenses:[], goals:[] };
+  DB.users.push(newUser);
+  saveDB(DB);
+  currentUser = DB.users[DB.users.length - 1];  // referencia viva
+  document.getElementById('regError').textContent = '';
+  navTo('profile');
+}
+
+function logout() { currentUser = null; navTo('login'); closeSideMenu(); }
+
+// Allow Enter key on login
+document.addEventListener('keydown', e => {
+  if(e.key==='Enter') {
+    const loginS = document.getElementById('screen-login');
+    if(loginS && loginS.classList.contains('active')) doLogin();
+  }
+});
+
+// ── INCOME ─────────────────────────────────────────────
+function renderIncome() {
+  if(!currentUser) return;
+  const list = document.getElementById('incomeList');
+  list.innerHTML = '';
+  let total = 0;
+  currentUser.income.forEach(item => {
+    total += item.amount;
+    list.innerHTML += `<div class="income-item">
+      <span class="label">💼 ${item.label}</span>
+      <span style="display:flex;align-items:center;gap:10px;">
+        <span class="amount">+$${item.amount.toLocaleString()}</span>
+        <button onclick="deleteIncome(${item.id})" style="background:none;border:none;cursor:pointer;color:#e05c5c;font-size:1rem;" title="Eliminar">🗑</button>
+      </span>
+    </div>`;
+  });
+  document.getElementById('totalIncome').textContent = '$'+total.toLocaleString();
+}
+
+function toggleAddIncome() {
+  const f = document.getElementById('addIncomeForm');
+  f.classList.toggle('open');
+}
+
+function addIncome() {
+  const label  = document.getElementById('newIncomeLabel').value.trim();
+  const amount = parseFloat(document.getElementById('newIncomeAmount').value);
+  if (!label||isNaN(amount)||amount<=0) return;
+  currentUser.income.push({ id: Date.now(), label, amount });
+  persist();
+  document.getElementById('newIncomeLabel').value='';
+  document.getElementById('newIncomeAmount').value='';
+  document.getElementById('addIncomeForm').classList.remove('open');
+  renderIncome();
+}
+
+function deleteIncome(id) {
+  currentUser.income = currentUser.income.filter(i => i.id !== id);
+  persist();
+  renderIncome();
+}
+
+// ── EXPENSES ───────────────────────────────────────────
+function renderExpenses() {
+  if(!currentUser) return;
+  const list = document.getElementById('expenseList');
+  list.innerHTML = '';
+  let total = 0;
+  const catIcons = {Vivienda:'🏠',Alimentación:'🍔',Transporte:'🚗',Entretenimiento:'🎉',Salud:'❤️',Educación:'📚',Otro:'📦'};
+  currentUser.expenses.forEach(item => {
+    total += item.amount;
+    const icon = catIcons[item.cat]||'📦';
+    list.innerHTML += `<div class="income-item expense-item">
+      <span class="label">${icon} ${item.label}<br><small style="color:#aaa;font-size:.75rem;">${item.cat}</small></span>
+      <span style="display:flex;align-items:center;gap:10px;">
+        <span class="amount">-$${item.amount.toLocaleString()}</span>
+        <button onclick="deleteExpense(${item.id})" style="background:none;border:none;cursor:pointer;color:#e05c5c;font-size:1rem;" title="Eliminar">🗑</button>
+      </span>
+    </div>`;
+  });
+  document.getElementById('totalExpenses').textContent = '$'+total.toLocaleString();
+}
+
+function toggleAddExpense() {
+  document.getElementById('addExpenseForm').classList.toggle('open');
+}
+
+function addExpense() {
+  const label  = document.getElementById('newExpenseLabel').value.trim();
+  const cat    = document.getElementById('newExpenseCat').value;
+  const amount = parseFloat(document.getElementById('newExpenseAmount').value);
+  if (!label||isNaN(amount)||amount<=0) return;
+  currentUser.expenses.push({ id: Date.now(), label, cat, amount });
+  persist();
+  document.getElementById('newExpenseLabel').value='';
+  document.getElementById('newExpenseAmount').value='';
+  document.getElementById('addExpenseForm').classList.remove('open');
+  renderExpenses();
+}
+
+function deleteExpense(id) {
+  currentUser.expenses = currentUser.expenses.filter(e => e.id !== id);
+  persist();
+  renderExpenses();
+}
+
+// ── BUDGET CHART ───────────────────────────────────────
+function renderBudget() {
+  if(!currentUser) return;
+  const totalInc = currentUser.income.reduce((s,i)=>s+i.amount,0);
+  const totalExp = currentUser.expenses.reduce((s,i)=>s+i.amount,0);
+  const surplus = totalInc - totalExp;
+  const canvas = document.getElementById('budgetChart');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,180,180);
+  const cx=90,cy=90,r=75;
+  const total = totalInc||1;
+  const expAngle = (totalExp/total)*Math.PI*2;
+  const surpAngle = Math.max(0,(surplus/total))*Math.PI*2;
+  // Expenses slice
+  ctx.beginPath(); ctx.moveTo(cx,cy);
+  ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+expAngle);
+  ctx.closePath(); ctx.fillStyle='#e05c5c'; ctx.fill();
+  // Surplus slice
+  ctx.beginPath(); ctx.moveTo(cx,cy);
+  ctx.arc(cx,cy,r,-Math.PI/2+expAngle,-Math.PI/2+expAngle+surpAngle);
+  ctx.closePath(); ctx.fillStyle='#3dba4e'; ctx.fill();
+  // If overspent
+  if(totalExp>totalInc){
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle='#e05c5c80'; ctx.fill();
+  }
+  // Center donut hole
+  ctx.beginPath(); ctx.arc(cx,cy,42,0,Math.PI*2);
+  ctx.fillStyle='#f5f7ff'; ctx.fill();
+  ctx.fillStyle=surplus>=0?'#3dba4e':'#e05c5c';
+  ctx.font='bold 14px Nunito'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText((surplus>=0?'+':'')+surplus.toLocaleString(),cx,cy-8);
+  ctx.fillStyle='#888'; ctx.font='11px Nunito';
+  ctx.fillText('saldo',cx,cy+10);
+}
+
+function showBudgetDetail() {
+  if(!currentUser) return;
+  const totalInc = currentUser.income.reduce((s,i)=>s+i.amount,0);
+  const totalExp = currentUser.expenses.reduce((s,i)=>s+i.amount,0);
+  const balance = totalInc - totalExp;
+  const estimated = Math.round(totalInc * 0.8);
+  const surplus = totalInc - estimated;
+  document.getElementById('bs-income').textContent = '$'+totalInc.toLocaleString();
+  document.getElementById('bs-expenses').textContent = '$'+totalExp.toLocaleString();
+  const balEl = document.getElementById('bs-balance');
+  balEl.textContent = '$'+balance.toLocaleString();
+  balEl.className = balance>=0?'green-val':'red-val';
+  document.getElementById('bs-est').textContent = '$'+estimated.toLocaleString();
+  document.getElementById('bs-surplus').textContent = '$'+surplus.toLocaleString();
+  const sumEl = document.getElementById('budgetSummary');
+  sumEl.style.display = sumEl.style.display==='none' ? 'block' : 'none';
+}
+
+// ── SAVINGS GOALS ──────────────────────────────────────
+const GOAL_COLORS = ['#1a1f6e','#7ef27e','#d4a843','#2bbfb0','#e05c5c','#9b59b6'];
+const GOAL_TEXT_COLORS = ['white', '#1a1f6e', 'white', 'white', 'white', 'white'];
+
+function renderGoals() {
+  if(!currentUser) return;
+  const list = document.getElementById('goalsList');
+  list.innerHTML = '';
+  currentUser.goals.forEach((g,i) => {
+    const pct = Math.min(100, Math.round((g.saved/g.target)*100));
+    const col = GOAL_COLORS[i%GOAL_COLORS.length];
+    const textCol = GOAL_TEXT_COLORS[i%GOAL_TEXT_COLORS.length];
+    list.innerHTML += `<div class="goal-card" style="background:${col};color:${textCol};" onclick="openGoalDetail(${g.id})">
+      ${g.name}
+      <div class="progress-wrap" style="margin-top:8px;">
+        <div class="progress-fill" style="width:${pct}%;background:${textCol==='white'?'rgba(255,255,255,.7)':'rgba(26,31,110,.4)'};"></div>
+      </div>
+      <div style="font-size:.8rem;font-weight:600;opacity:.85;margin-top:4px;">$${g.saved.toLocaleString()} / $${g.target.toLocaleString()} (${pct}%)</div>
+    </div>`;
+  });
+}
+
+function openGoalDetail(id) {
+  const g = currentUser.goals.find(x=>x.id===id);
+  if(!g) return;
+  const pct = Math.min(100,Math.round((g.saved/g.target)*100));
+  const remaining = g.target - g.saved;
+  const months = g.monthly>0 ? Math.ceil(remaining/g.monthly) : '—';
+  document.getElementById('goalModalTitle').textContent = '🎯 '+g.name;
+  document.getElementById('goalModalBody').innerHTML = `
+    <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;background:#2bbfb0;"></div></div>
+    <div class="budget-row"><span>Meta total</span><strong>$${g.target.toLocaleString()}</strong></div>
+    <div class="budget-row"><span>Ya ahorrado</span><strong class="green-val">$${g.saved.toLocaleString()}</strong></div>
+    <div class="budget-row"><span>Falta</span><strong class="red-val">$${remaining.toLocaleString()}</strong></div>
+    <div class="budget-row"><span>Ahorro mensual</span><strong>$${g.monthly.toLocaleString()}/mes</strong></div>
+    <div class="budget-row"><span>Tiempo estimado</span><strong>${months} meses</strong></div>
+    <div class="tip-box" style="margin-top:12px;">🚀 ¡Sigue así! Llevas el ${pct}% del camino.</div>
+    <input type="number" id="addSavedInput" placeholder="Agregar ahorro $" style="width:100%;padding:8px;margin-top:10px;border:1px solid #ccc;border-radius:6px;font-family:Nunito,sans-serif;">
+    <button class="btn btn-teal" style="margin-top:8px;" onclick="addToGoal(${id})">Agregar al ahorro</button>
+    <button class="btn btn-outline" style="margin-top:8px;color:#e05c5c;border-color:#e05c5c;" onclick="deleteGoal(${id})">🗑 Eliminar esta meta</button>
+  `;
+  document.getElementById('goalModal').classList.add('open');
+}
+
+function addToGoal(id) {
+  const g = currentUser.goals.find(x=>x.id===id);
+  const val = parseFloat(document.getElementById('addSavedInput').value);
+  if(!g||isNaN(val)||val<=0) return;
+  g.saved = Math.min(g.target, g.saved+val);
+  persist();
+  closeModal('goalModal');
+  renderGoals();
+}
+
+function deleteGoal(id) {
+  currentUser.goals = currentUser.goals.filter(g => g.id !== id);
+  persist();
+  closeModal('goalModal');
+  renderGoals();
+}
+
+function toggleAddGoal() {
+  document.getElementById('addGoalForm').classList.toggle('open');
+}
+
+function addGoal() {
+  const name    = document.getElementById('newGoalName').value.trim().toUpperCase();
+  const target  = parseFloat(document.getElementById('newGoalTarget').value);
+  const saved   = parseFloat(document.getElementById('newGoalSaved').value)||0;
+  const monthly = parseFloat(document.getElementById('newGoalMonthly').value)||0;
+  if(!name||isNaN(target)||target<=0) return;
+  currentUser.goals.push({ id: Date.now(), name, target, saved, monthly });
+  persist();
+  ['newGoalName','newGoalTarget','newGoalSaved','newGoalMonthly'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('addGoalForm').classList.remove('open');
+  renderGoals();
+}
+
+// ── EDUCATION ──────────────────────────────────────────
+function renderEdu() {
+  const container = document.getElementById('eduTopics');
+  container.innerHTML = '';
+  EDU_TOPICS.forEach((t,i) => {
+    container.innerHTML += `<div class="edu-tile" style="border-left-color:${t.color};" onclick="openEduModal(${i})">
+      <h4 style="color:${t.color};">${t.title}</h4>
+      <p>${t.short}</p>
+    </div>`;
+  });
+}
+
+function openEduModal(i) {
+  const t = EDU_TOPICS[i];
+  document.getElementById('eduModalTitle').textContent = t.title;
+  document.getElementById('eduModalTitle').style.color = t.color;
+  document.getElementById('eduModalBody').textContent = t.long;
+  document.getElementById('eduModal').classList.add('open');
+}
+
+function showEduInfo() { navTo('education'); }
+
+// ── FAQ ────────────────────────────────────────────────
+function renderFAQ() {
+  const list = document.getElementById('faqList');
+  list.innerHTML = '';
+  FAQ_DATA.forEach((f,i) => {
+    list.innerHTML += `<div class="faq-item" id="faq-${i}">
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <span>${f.q}</span><span>▼</span>
+      </div>
+      <div class="faq-a">${f.a}</div>
+    </div>`;
+  });
+}
+
+function toggleFAQ(i) {
+  document.getElementById('faq-'+i).classList.toggle('open');
+}
+
+// ── SIDE MENU ──────────────────────────────────────────
+function openSideMenu() {
+  document.getElementById('sideMenu').classList.add('open');
+  document.getElementById('overlayBg').classList.add('open');
+}
+function closeSideMenu() {
+  document.getElementById('sideMenu').classList.remove('open');
+  document.getElementById('overlayBg').classList.remove('open');
+}
+
+// ── MODALS ─────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ── INIT ───────────────────────────────────────────────
+// Make sure only login screen is visible on load
+navTo('login');
+</script>
+</body>
+</html>
